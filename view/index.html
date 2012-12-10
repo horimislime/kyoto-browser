@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <title>List of records | kyoto-browser</title>
+
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.css">
+    <script type="text/javascript" language="javascript" src="static/js/jquery.js"></script>
+    <script type="text/javascript" language="javascript" src="static/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        /* Default class modification */
+        $.extend( $.fn.dataTableExt.oStdClasses, {
+            "sSortAsc": "header headerSortDown",
+            "sSortDesc": "header headerSortUp",
+            "sSortable": "header"
+        } );
+
+        function formSubmit(destination,confirmMessage){
+            document.form.action=destination;
+            if(confirm(confirmMessage)){
+                document.form.submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">kyoto-browser</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li class="inactive"><a href="/settings">Settings</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+    <!-- end of navigation bar -->
+
+    {% if dto.message is not None %}
+        {% if dto.message['success'] is not None %}
+        <div class="alert alert-success">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            {{ dto.message['success'] }}
+        </div>
+
+        {% elif dto.message['error'] is not None %}
+        <div class="alert alert-error">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+            {{ dto.message['error'] }}
+        </div>
+        {% end %}
+    {% end %}
+
+    <div class="container">
+        <form name="form" method="POST" action="">
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-striped table-bordered" id="example">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                        <th>Expire</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dataset in dto.datasets %}
+                    <tr>
+                        <td>{{ dataset.key }}</td>
+                        <td>{{ dataset.value }}</td>
+                        <td></td>
+                        <td width="145px">
+                            <button class="btn btn-success" type="button" onclick="formSubmit('/update?key={{dataset.key}}&value={{dataset.value}}','{{dataset.key}}を更新しますか？')">Update</button>
+                            <button class="btn btn-danger" type="button" onclick="formSubmit('/delete?key={{dataset.key}}','キーを削除しますか?')">Expire</button>
+                        </td>
+                    </tr>
+                    {% end %}
+                </tbody>
+             </table>
+        </form>
+
+        <div class="pagination">
+            <ul>
+               {% if dto.pagination.has_prev %}
+                <li class="prev">
+                    <a href="/?pageNo={{dto.pagination.page_no()-1}}">Prev</a>
+                </li>
+                {% end %}
+                {% for page in dto.pagination.iter_pages() %}
+                {% if page==dto.page_no %}
+                <li class="active">
+                {% else %}
+                <li class="inactive">
+                {% end %}
+                <a href="/?pageNo={{ page }}">{{ page }}</a>
+                </li>
+                {% end %}
+                {% if dto.pagination.has_next %}
+                <li class="next">
+                    <a href="/?pageNo={{dto.pagination.page_no()+1}}">Next</a>
+                </li>
+                {% end %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
